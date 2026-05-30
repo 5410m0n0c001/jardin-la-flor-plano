@@ -811,6 +811,7 @@ input[type="text"]:focus, input[type="number"]:focus {
   display: none !important;
 }
 
+/* Estilos de botones de alternancia en Header (Móvil) */
 .btn-mobile-toggle {
   background: rgba(212, 175, 55, 0.1);
   border: 1px solid var(--color-gold);
@@ -853,6 +854,126 @@ input[type="text"]:focus, input[type="number"]:focus {
   opacity: 1;
 }
 
+/* Estilos para el panel de acciones móviles dentro del Drawer */
+.mobile-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-action-mobile {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 10px;
+  font-family: var(--font-family);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition-smooth);
+}
+
+.btn-action-mobile:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.btn-action-mobile.active {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.btn-success-mobile {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+}
+.btn-success-mobile:hover {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.btn-danger-mobile {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+.btn-danger-mobile:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.divider-horizontal {
+  height: 1px;
+  background: var(--border-color);
+  margin: 16px 0 10px 0;
+}
+
+/* Botones de Acción Flotantes (FABs) */
+.fab-mobile {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 2px solid var(--color-gold);
+  color: var(--color-gold);
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.2);
+  z-index: 75;
+  pointer-events: auto;
+  transition: var(--transition-smooth);
+}
+
+.fab-mobile:hover {
+  background: var(--color-gold);
+  color: #000;
+  transform: scale(1.05);
+}
+
+.fab-mobile:active {
+  transform: scale(0.95);
+}
+
+#fab-tools {
+  left: 16px;
+  bottom: 75px;
+}
+
+#fab-properties {
+  right: 16px;
+  bottom: 75px;
+}
+
+/* Efecto de brillo de pulso dorado para selección activa */
+#fab-properties.pulse-glow {
+  animation: fab-pulse 2s infinite;
+  border-color: #34d399; /* Cambiar a esmeralda/verde al seleccionar */
+  color: #34d399;
+}
+
+@keyframes fab-pulse {
+  0% {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 0px rgba(52, 211, 153, 0.4);
+  }
+  70% {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(52, 211, 153, 0.8);
+  }
+  100% {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 0px rgba(52, 211, 153, 0.4);
+  }
+}
+
 @media (max-width: 950px) {
   .app-header {
     padding: 0 12px;
@@ -892,6 +1013,22 @@ input[type="text"]:focus, input[type="number"]:focus {
   
   .hide-mobile {
     display: none !important;
+  }
+
+  /* Optimizar visualización a pantalla completa en móviles */
+  .canvas-wrapper {
+    padding: 6px;
+  }
+  
+  .hud-scale, .hud-coords {
+    font-size: 0.65rem;
+    padding: 4px 10px;
+  }
+  
+  .canvas-hud {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
   }
 }
 
@@ -937,4 +1074,5 @@ input[type="text"]:focus, input[type="number"]:focus {
     display: none;
   }
 }
+
 

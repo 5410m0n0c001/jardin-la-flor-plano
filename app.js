@@ -123,6 +123,34 @@ function setupUI() {
 
     sidebarOverlay.addEventListener("click", closeMobileSidebars);
   }
+
+  // --- Lógica para Botones Flotantes (FABs) en móviles ---
+  const fabTools = document.getElementById("fab-tools");
+  const fabProperties = document.getElementById("fab-properties");
+
+  if (fabTools) {
+    fabTools.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = sidebarLeft.classList.contains("open");
+      closeMobileSidebars();
+      if (!isOpen) {
+        sidebarLeft.classList.add("open");
+        sidebarOverlay.classList.add("active");
+      }
+    });
+  }
+
+  if (fabProperties) {
+    fabProperties.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = sidebarRight.classList.contains("open");
+      closeMobileSidebars();
+      if (!isOpen) {
+        sidebarRight.classList.add("open");
+        sidebarOverlay.classList.add("active");
+      }
+    });
+  }
 }
 
 /**
@@ -245,6 +273,13 @@ function handleElementSelected(element) {
   const inspectorForm = document.getElementById("inspector-form");
   const noSelectionMsg = document.getElementById("no-selection-msg");
   
+  const fabProp = document.getElementById("fab-properties");
+  if (element) {
+    if (fabProp) fabProp.classList.add("pulse-glow");
+  } else {
+    if (fabProp) fabProp.classList.remove("pulse-glow");
+  }
+
   if (!element) {
     inspectorForm.style.display = "none";
     noSelectionMsg.style.display = "flex";
@@ -505,32 +540,48 @@ function setupInspectorListeners() {
 function setupControlListeners() {
   // Ajuste magnético de Rejilla
   const btnGrid = document.getElementById("btn-grid");
-  btnGrid.addEventListener("click", () => {
+  const btnGridMob = document.getElementById("btn-grid-mob");
+  
+  const toggleGrid = () => {
     state.useGrid = !state.useGrid;
     if (state.useGrid) {
-      btnGrid.classList.add("active");
+      if (btnGrid) btnGrid.classList.add("active");
+      if (btnGridMob) btnGridMob.classList.add("active");
     } else {
-      btnGrid.classList.remove("active");
+      if (btnGrid) btnGrid.classList.remove("active");
+      if (btnGridMob) btnGridMob.classList.remove("active");
     }
     setGridSnap(state.useGrid);
-  });
+  };
+  
+  if (btnGrid) btnGrid.addEventListener("click", toggleGrid);
+  if (btnGridMob) btnGridMob.addEventListener("click", toggleGrid);
   
   // Exportar distribución (JSON)
-  document.getElementById("btn-export").addEventListener("click", () => {
+  const exportDesign = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.elements, null, 2));
     const dlAnchorElem = document.createElement('a');
     dlAnchorElem.setAttribute("href",     dataStr     );
     dlAnchorElem.setAttribute("download", "plano_jardin_la_flor.json");
     dlAnchorElem.click();
-  });
+  };
+  
+  const btnExport = document.getElementById("btn-export");
+  if (btnExport) btnExport.addEventListener("click", exportDesign);
+  const btnExportMob = document.getElementById("btn-export-mob");
+  if (btnExportMob) btnExportMob.addEventListener("click", exportDesign);
   
   // Disparar seleccionador de archivos para importar
   const btnImportTrigger = document.getElementById("btn-import-trigger");
+  const btnImportTriggerMob = document.getElementById("btn-import-trigger-mob");
   const fileImport = document.getElementById("file-import");
   
-  btnImportTrigger.addEventListener("click", () => {
+  const triggerImport = () => {
     fileImport.click();
-  });
+  };
+  
+  if (btnImportTrigger) btnImportTrigger.addEventListener("click", triggerImport);
+  if (btnImportTriggerMob) btnImportTriggerMob.addEventListener("click", triggerImport);
   
   fileImport.addEventListener("change", (e) => {
     const file = e.target.files[0];
@@ -568,7 +619,7 @@ function setupControlListeners() {
   });
   
   // Reiniciar a la distribución original
-  document.getElementById("btn-reset").addEventListener("click", () => {
+  const resetLayout = () => {
     const confirmReset = confirm("¿Está seguro de que desea restablecer el diseño? Se borrarán todos los cambios y elementos adicionales creados.");
     if (confirmReset) {
       state.elements = JSON.parse(JSON.stringify(INITIAL_ELEMENTS));
@@ -576,5 +627,10 @@ function setupControlListeners() {
       handleElementSelected(null);
       syncAllViews();
     }
-  });
+  };
+  
+  const btnReset = document.getElementById("btn-reset");
+  if (btnReset) btnReset.addEventListener("click", resetLayout);
+  const btnResetMob = document.getElementById("btn-reset-mob");
+  if (btnResetMob) btnResetMob.addEventListener("click", resetLayout);
 }

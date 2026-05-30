@@ -85,6 +85,27 @@
         </div>
         
         <div class="sidebar-scroll">
+          <!-- Sección de Acciones para Móvil (Oculta en Desktop) -->
+          <div class="toolbox-group hide-desktop">
+            <h3>Herramientas y Acciones</h3>
+            <p class="group-desc">Controle la rejilla y guarde o cargue el plano.</p>
+            <div class="mobile-actions-grid">
+              <button id="btn-grid-mob" class="btn-action-mobile active" title="Rejilla">
+                <i class="fa-solid fa-border-all"></i> Rejilla
+              </button>
+              <button id="btn-export-mob" class="btn-action-mobile btn-success-mobile" title="Guardar">
+                <i class="fa-solid fa-download"></i> Guardar
+              </button>
+              <button id="btn-import-trigger-mob" class="btn-action-mobile" title="Cargar">
+                <i class="fa-solid fa-upload"></i> Cargar
+              </button>
+              <button id="btn-reset-mob" class="btn-action-mobile btn-danger-mobile" title="Reiniciar">
+                <i class="fa-solid fa-rotate-left"></i> Reiniciar
+              </button>
+            </div>
+            <div class="divider-horizontal"></div>
+          </div>
+
           <!-- Sección 1: Elementos del Salón -->
           <div class="toolbox-group">
             <h3>Elementos del Salón</h3>
@@ -200,6 +221,14 @@
             </button>
           </div>
         </div>
+        
+        <!-- Botones Flotantes (FABs) para Móviles -->
+        <button id="fab-tools" class="fab-mobile hide-desktop" title="Mostrar Herramientas">
+          <i class="fa-solid fa-toolbox"></i>
+        </button>
+        <button id="fab-properties" class="fab-mobile hide-desktop" title="Mostrar Propiedades">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
         
       </section>
       

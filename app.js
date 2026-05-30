@@ -267,7 +267,7 @@ function updateBadgeCounters() {
 /**
  * Maneja el evento de selección de un elemento (desde 2D)
  */
-function handleElementSelected(element) {
+function handleElementSelected(element, openSidebar = true) {
   state.selectedElement = element;
   
   const inspectorForm = document.getElementById("inspector-form");
@@ -289,8 +289,8 @@ function handleElementSelected(element) {
   noSelectionMsg.style.display = "none";
   inspectorForm.style.display = "flex";
   
-  // Abrir de forma automatizada el panel de propiedades en móviles al seleccionar
-  if (element && window.innerWidth <= 950) {
+  // Abrir de forma automatizada el panel de propiedades en móviles al seleccionar si está permitido
+  if (openSidebar && element && window.innerWidth <= 950) {
     const sidebarLeft = document.querySelector(".sidebar-left");
     const sidebarRight = document.querySelector(".sidebar-right");
     const sidebarOverlay = document.getElementById("sidebar-overlay");

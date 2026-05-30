@@ -111,12 +111,20 @@ function applyZoomPan() {
  * Funciones exportadas de zoom y centrado para la interfaz HUD
  */
 export function zoomIn() {
+  const oldZoom = zoom;
   zoom = Math.min(3.0, zoom + 0.15);
+  // Zoom centrado en el centro geométrico del canvas (800, 800)
+  pan.x = 800 - (800 - pan.x) * (zoom / oldZoom);
+  pan.y = 800 - (800 - pan.y) * (zoom / oldZoom);
   applyZoomPan();
 }
 
 export function zoomOut() {
+  const oldZoom = zoom;
   zoom = Math.max(0.5, zoom - 0.15);
+  // Zoom centrado en el centro geométrico del canvas (800, 800)
+  pan.x = 800 - (800 - pan.x) * (zoom / oldZoom);
+  pan.y = 800 - (800 - pan.y) * (zoom / oldZoom);
   applyZoomPan();
 }
 
@@ -144,80 +152,101 @@ function setupCanvasEvents() {
   
   // 2. Deseleccionar elementos al hacer clic en el fondo
   activeSvg.addEventListener("click", (evt) => {
-    const targetId = evt.target.id;
-    if (targetId === "svg-canvas" || targetId === "canvas-grid" || evt.target.getAttribute("stroke-dasharray") === "12,6") {
+    const draggable = evt.target.closest(".draggable");
+    if (!draggable) {
       selectedElementId = null;
       if (onSelectedCallback) onSelectedCallback(null);
       render();
     }
   });
 
-  // 3. Zoom mediante la rueda del ratón (Wheel)
+  // 3. Zoom mediante la rueda del ratón (Wheel) centrado en el puntero del mouse
   activeSvg.addEventListener("wheel", (evt) => {
     evt.preventDefault();
     const oldZoom = zoom;
     const zoomIntensity = 0.08;
+    
+    // Obtener la posición del mouse relativa al SVG
+    const rect = activeSvg.getBoundingClientRect();
+    const mouseX = evt.clientX - rect.left;
+    const mouseY = evt.clientY - rect.top;
+    
+    // Traducir a coordenadas dentro del viewBox de 1600x1600
+    const x_f = (mouseX / rect.width) * 1600;
+    const y_f = (mouseY / rect.height) * 1600;
     
     if (evt.deltaY < 0) {
       zoom = Math.min(3.0, zoom + zoomIntensity);
     } else {
       zoom = Math.max(0.5, zoom - zoomIntensity);
     }
+    
+    // Ajustar el desplazamiento (pan) para mantener el foco bajo el puntero
+    pan.x = x_f - (x_f - pan.x) * (zoom / oldZoom);
+    pan.y = y_f - (y_f - pan.y) * (zoom / oldZoom);
+    
     applyZoomPan();
   }, { passive: false });
 
   // 4. Desplazamiento del lienzo 2D (Panning) - Desktop
   activeSvg.addEventListener("mousedown", (evt) => {
-    const targetId = evt.target.id;
-    // Pestaña si el clic ocurre en el fondo del lienzo
-    if (targetId === "svg-canvas" || targetId === "canvas-grid" || evt.target.tagName === "svg" || evt.target.getAttribute("stroke-dasharray") === "12,6") {
+    const draggable = evt.target.closest(".draggable");
+    // Activamos paneo solo si NO estamos haciendo clic sobre un elemento interactivo
+    if (!draggable) {
       isPanning = true;
       startPan.x = evt.clientX - pan.x;
       startPan.y = evt.clientY - pan.y;
       activeSvg.style.cursor = "grabbing";
-    }
-  });
-
-  window.addEventListener("mousemove", (evt) => {
-    if (isPanning) {
-      pan.x = evt.clientX - startPan.x;
-      pan.y = evt.clientY - startPan.y;
-      applyZoomPan();
-    }
-  });
-
-  window.addEventListener("mouseup", () => {
-    if (isPanning) {
-      isPanning = false;
-      activeSvg.style.cursor = "default";
+      
+      const onWindowMouseMovePan = (moveEvt) => {
+        if (isPanning) {
+          pan.x = moveEvt.clientX - startPan.x;
+          pan.y = moveEvt.clientY - startPan.y;
+          applyZoomPan();
+        }
+      };
+      
+      const onWindowMouseUpPan = () => {
+        isPanning = false;
+        activeSvg.style.cursor = "default";
+        window.removeEventListener("mousemove", onWindowMouseMovePan);
+        window.removeEventListener("mouseup", onWindowMouseUpPan);
+      };
+      
+      window.addEventListener("mousemove", onWindowMouseMovePan);
+      window.addEventListener("mouseup", onWindowMouseUpPan);
     }
   });
 
   // 5. Desplazamiento del lienzo 2D (Panning) - Móvil táctil
   activeSvg.addEventListener("touchstart", (evt) => {
-    const targetId = evt.target.touches[0].target.id;
-    if (targetId === "svg-canvas" || targetId === "canvas-grid" || evt.target.touches[0].target.tagName === "svg" || evt.target.touches[0].target.getAttribute("stroke-dasharray") === "12,6") {
-      if (evt.touches.length === 1) {
-        isPanning = true;
-        const touch = evt.touches[0];
-        startPan.x = touch.clientX - pan.x;
-        startPan.y = touch.clientY - pan.y;
-      }
-    }
-  });
-
-  window.addEventListener("touchmove", (evt) => {
-    if (isPanning && evt.touches.length === 1) {
-      const touch = evt.touches[0];
-      pan.x = touch.clientX - startPan.x;
-      pan.y = touch.clientY - startPan.y;
-      applyZoomPan();
-    }
-  }, { passive: true });
-
-  window.addEventListener("touchend", () => {
-    if (isPanning) {
-      isPanning = false;
+    if (evt.touches.length > 1) return;
+    const touch = evt.touches[0];
+    const draggable = touch.target.closest(".draggable");
+    
+    // Paneo en móvil si no toca un elemento arrastrable
+    if (!draggable) {
+      isPanning = true;
+      startPan.x = touch.clientX - pan.x;
+      startPan.y = touch.clientY - pan.y;
+      
+      const onWindowTouchMovePan = (moveEvt) => {
+        if (isPanning && moveEvt.touches.length === 1) {
+          const moveTouch = moveEvt.touches[0];
+          pan.x = moveTouch.clientX - startPan.x;
+          pan.y = moveTouch.clientY - startPan.y;
+          applyZoomPan();
+        }
+      };
+      
+      const onWindowTouchEndPan = () => {
+        isPanning = false;
+        window.removeEventListener("touchmove", onWindowTouchMovePan);
+        window.removeEventListener("touchend", onWindowTouchEndPan);
+      };
+      
+      window.addEventListener("touchmove", onWindowTouchMovePan, { passive: true });
+      window.addEventListener("touchend", onWindowTouchEndPan);
     }
   });
 }
@@ -277,7 +306,11 @@ function setupDragEvents(group, elem) {
   // A) Arrastre con ratón (Desktop)
   group.addEventListener("mousedown", (evt) => {
     evt.stopPropagation();
-    selectedElementId = elem.id;
+    
+    const startX = evt.clientX;
+    const startY = evt.clientY;
+    let hasMoved = false;
+    
     isDragging = true;
     dragTarget = elem;
     
@@ -285,23 +318,53 @@ function setupDragEvents(group, elem) {
     dragOffset.x = mouseCoords.mX - elem.x;
     dragOffset.y = mouseCoords.mY - elem.y;
     
-    if (onSelectedCallback) onSelectedCallback(elem);
+    const onMouseMove = (moveEvt) => {
+      if (!isDragging || !dragTarget) return;
+      
+      const distance = Math.hypot(moveEvt.clientX - startX, moveEvt.clientY - startY);
+      // Solo consideramos que hay movimiento real si se desplaza más de 4px
+      if (distance > 4) {
+        hasMoved = true;
+        const rect = activeSvg.getBoundingClientRect();
+        const x = moveEvt.clientX - rect.left;
+        const y = moveEvt.clientY - rect.top;
+        updateDragPosition(x, y, rect);
+      }
+    };
     
-    // Cambiar clases de selección visual
-    selectElement2D(elem.id);
+    const onMouseUp = () => {
+      isDragging = false;
+      dragTarget = null;
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      
+      selectedElementId = elem.id;
+      selectElement2D(elem.id);
+      
+      if (!hasMoved) {
+        // Clic sin arrastrar: selecciona y abre de forma interactiva el panel
+        if (onSelectedCallback) onSelectedCallback(elem, true);
+      } else {
+        // Se arrastró: selecciona silenciosamente sin abrir el panel de móvil de forma molesta
+        if (onSelectedCallback) onSelectedCallback(elem, false);
+      }
+      render(); // Re-dibujar completo para acomodar sillas
+    };
     
-    // Vincular eventos a nivel de ventana para mantener el arrastre fluido fuera del SVG
-    window.addEventListener("mousemove", onWindowMouseMove);
-    window.addEventListener("mouseup", onWindowMouseUp);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
   });
 
   // B) Arrastre táctil (Móvil)
   group.addEventListener("touchstart", (evt) => {
-    if (evt.touches.length > 1) return; // Ignorar multi-touch para evitar conflictos
+    if (evt.touches.length > 1) return; // Ignorar multi-touch
     evt.stopPropagation();
     
     const touch = evt.touches[0];
-    selectedElementId = elem.id;
+    const startX = touch.clientX;
+    const startY = touch.clientY;
+    let hasMoved = false;
+    
     isDragging = true;
     dragTarget = elem;
     
@@ -314,39 +377,44 @@ function setupDragEvents(group, elem) {
     dragOffset.x = mouseCoords.mX - elem.x;
     dragOffset.y = mouseCoords.mY - elem.y;
     
-    if (onSelectedCallback) onSelectedCallback(elem);
+    const onTouchMove = (moveEvt) => {
+      if (!isDragging || !dragTarget || moveEvt.touches.length === 0) return;
+      const moveTouch = moveEvt.touches[0];
+      
+      const distance = Math.hypot(moveTouch.clientX - startX, moveTouch.clientY - startY);
+      if (distance > 5) {
+        hasMoved = true;
+        moveEvt.preventDefault(); // Evitar scroll táctil del navegador al arrastrar
+        
+        const rect = activeSvg.getBoundingClientRect();
+        const x = moveTouch.clientX - rect.left;
+        const y = moveTouch.clientY - rect.top;
+        updateDragPosition(x, y, rect);
+      }
+    };
     
-    selectElement2D(elem.id);
+    const onTouchEnd = () => {
+      isDragging = false;
+      dragTarget = null;
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      
+      selectedElementId = elem.id;
+      selectElement2D(elem.id);
+      
+      if (!hasMoved) {
+        // Tap simple: abre las propiedades y despliega el cajón
+        if (onSelectedCallback) onSelectedCallback(elem, true);
+      } else {
+        // Desplazamiento táctil finalizado: selecciona de forma silenciosa
+        if (onSelectedCallback) onSelectedCallback(elem, false);
+      }
+      render();
+    };
     
-    window.addEventListener("touchmove", onWindowTouchMove, { passive: false });
-    window.addEventListener("touchend", onWindowTouchEnd);
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onTouchEnd);
   });
-}
-
-function onWindowMouseMove(evt) {
-  if (!isDragging || !dragTarget) return;
-  
-  const rect = activeSvg.getBoundingClientRect();
-  const x = evt.clientX - rect.left;
-  const y = evt.clientY - rect.top;
-  
-  updateDragPosition(x, y, rect);
-}
-
-function onWindowTouchMove(evt) {
-  if (!isDragging || !dragTarget) return;
-  
-  // Evitar que la pantalla se desplace mientras se arrastra una mesa
-  evt.preventDefault();
-  
-  if (evt.touches.length === 0) return;
-  const touch = evt.touches[0];
-  
-  const rect = activeSvg.getBoundingClientRect();
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
-  
-  updateDragPosition(x, y, rect);
 }
 
 function updateDragPosition(clientX, clientY, rect) {
@@ -391,26 +459,6 @@ function updateDragPosition(clientX, clientY, rect) {
   // Notificar cambio
   if (onMovedCallback) {
     onMovedCallback(dragTarget);
-  }
-}
-
-function onWindowMouseUp() {
-  if (isDragging) {
-    isDragging = false;
-    dragTarget = null;
-    window.removeEventListener("mousemove", onWindowMouseMove);
-    window.removeEventListener("mouseup", onWindowMouseUp);
-    render(); // Re-dibujar completamente al soltar para alinear sillas correctamente
-  }
-}
-
-function onWindowTouchEnd() {
-  if (isDragging) {
-    isDragging = false;
-    dragTarget = null;
-    window.removeEventListener("touchmove", onWindowTouchMove);
-    window.removeEventListener("touchend", onWindowTouchEnd);
-    render(); // Re-dibujar completamente
   }
 }
 

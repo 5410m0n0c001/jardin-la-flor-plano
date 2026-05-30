@@ -15,6 +15,12 @@ let dragOffset = { x: 0, y: 0 };
 let useGrid = true;
 const GRID_SNAP_VAL = 0.1; // Ajuste a rejilla cada 10 cm (0.1m)
 
+// Variables de Zoom y Panning (Desplazamiento)
+let zoom = 1.0;
+let pan = { x: 0, y: 0 };
+let isPanning = false;
+let startPan = { x: 0, y: 0 };
+
 // Callbacks para comunicar eventos con app.js
 let onSelectedCallback = null;
 let onMovedCallback = null;
@@ -69,45 +75,149 @@ export function selectElement2D(elementId) {
 }
 
 /**
- * Convierte coordenadas del ratón a metros reales del plano SVG
+ * Convierte coordenadas del ratón a metros reales del plano SVG,
+ * considerando el zoom y desplazamiento (pan) aplicados al plano.
  */
 function getMouseCoords(evt) {
   const rect = activeSvg.getBoundingClientRect();
   const x = evt.clientX - rect.left;
   const y = evt.clientY - rect.top;
   
-  // Ajustar escala respecto al viewBox original de 640x800
-  const viewWidth = 640;
-  const viewHeight = 800;
+  // viewBox ampliado a 1600x1600 px para terreno de 40m x 40m
+  const svgX = (x / rect.width) * 1600;
+  const svgY = (y / rect.height) * 1600;
   
-  const svgX = (x / rect.width) * viewWidth;
-  const svgY = (y / rect.height) * viewHeight;
+  // Transformación inversa considerando el zoom y desplazamiento del plano
+  const mX = (svgX - pan.x) / (zoom * SCALE);
+  const mY = (svgY - pan.y) / (zoom * SCALE);
   
   return {
-    mX: parseFloat((svgX / SCALE).toFixed(2)),
-    mY: parseFloat((svgY / SCALE).toFixed(2))
+    mX: parseFloat(mX.toFixed(2)),
+    mY: parseFloat(mY.toFixed(2))
   };
+}
+
+/**
+ * Aplica visualmente la matriz de transformación SVG de escala y traslación
+ */
+function applyZoomPan() {
+  const zoomGroup = document.getElementById("svg-zoom-group");
+  if (zoomGroup) {
+    zoomGroup.setAttribute("transform", `translate(${pan.x}, ${pan.y}) scale(${zoom})`);
+  }
+}
+
+/**
+ * Funciones exportadas de zoom y centrado para la interfaz HUD
+ */
+export function zoomIn() {
+  zoom = Math.min(3.0, zoom + 0.15);
+  applyZoomPan();
+}
+
+export function zoomOut() {
+  zoom = Math.max(0.5, zoom - 0.15);
+  applyZoomPan();
+}
+
+export function resetZoom() {
+  zoom = 1.0;
+  pan.x = 0;
+  pan.y = 0;
+  applyZoomPan();
 }
 
 /**
  * Configura los eventos del ratón/táctil para interactividad
  */
 function setupCanvasEvents() {
-  // Evento mousemove para mostrar las coordenadas en tiempo real en el HUD
+  // 1. Mostrar coordenadas en el HUD en tiempo real
   activeSvg.addEventListener("mousemove", (evt) => {
     const coords = getMouseCoords(evt);
     const coordHud = document.getElementById("coord-hud");
-    if (coordHud && coords.mX >= 0 && coords.mX <= 16 && coords.mY >= 0 && coords.mY <= 20) {
-      coordHud.innerHTML = `<i class="fa-solid fa-crosshairs"></i> X: ${coords.mX.toFixed(1)}m, Y: ${coords.mY.toFixed(1)}m`;
+    if (coords.mX >= 0 && coords.mX <= 40 && coords.mY >= 0 && coords.mY <= 40) {
+      if (coordHud) {
+        coordHud.innerHTML = `<i class="fa-solid fa-crosshairs"></i> X: ${coords.mX.toFixed(1)}m, Y: ${coords.mY.toFixed(1)}m`;
+      }
     }
   });
   
-  // Deseleccionar al hacer clic en el fondo
+  // 2. Deseleccionar elementos al hacer clic en el fondo
   activeSvg.addEventListener("click", (evt) => {
-    if (evt.target.id === "svg-canvas" || evt.target.id === "canvas-grid") {
+    const targetId = evt.target.id;
+    if (targetId === "svg-canvas" || targetId === "canvas-grid" || evt.target.getAttribute("stroke-dasharray") === "12,6") {
       selectedElementId = null;
       if (onSelectedCallback) onSelectedCallback(null);
       render();
+    }
+  });
+
+  // 3. Zoom mediante la rueda del ratón (Wheel)
+  activeSvg.addEventListener("wheel", (evt) => {
+    evt.preventDefault();
+    const oldZoom = zoom;
+    const zoomIntensity = 0.08;
+    
+    if (evt.deltaY < 0) {
+      zoom = Math.min(3.0, zoom + zoomIntensity);
+    } else {
+      zoom = Math.max(0.5, zoom - zoomIntensity);
+    }
+    applyZoomPan();
+  }, { passive: false });
+
+  // 4. Desplazamiento del lienzo 2D (Panning) - Desktop
+  activeSvg.addEventListener("mousedown", (evt) => {
+    const targetId = evt.target.id;
+    // Pestaña si el clic ocurre en el fondo del lienzo
+    if (targetId === "svg-canvas" || targetId === "canvas-grid" || evt.target.tagName === "svg" || evt.target.getAttribute("stroke-dasharray") === "12,6") {
+      isPanning = true;
+      startPan.x = evt.clientX - pan.x;
+      startPan.y = evt.clientY - pan.y;
+      activeSvg.style.cursor = "grabbing";
+    }
+  });
+
+  window.addEventListener("mousemove", (evt) => {
+    if (isPanning) {
+      pan.x = evt.clientX - startPan.x;
+      pan.y = evt.clientY - startPan.y;
+      applyZoomPan();
+    }
+  });
+
+  window.addEventListener("mouseup", () => {
+    if (isPanning) {
+      isPanning = false;
+      activeSvg.style.cursor = "default";
+    }
+  });
+
+  // 5. Desplazamiento del lienzo 2D (Panning) - Móvil táctil
+  activeSvg.addEventListener("touchstart", (evt) => {
+    const targetId = evt.target.touches[0].target.id;
+    if (targetId === "svg-canvas" || targetId === "canvas-grid" || evt.target.touches[0].target.tagName === "svg" || evt.target.touches[0].target.getAttribute("stroke-dasharray") === "12,6") {
+      if (evt.touches.length === 1) {
+        isPanning = true;
+        const touch = evt.touches[0];
+        startPan.x = touch.clientX - pan.x;
+        startPan.y = touch.clientY - pan.y;
+      }
+    }
+  });
+
+  window.addEventListener("touchmove", (evt) => {
+    if (isPanning && evt.touches.length === 1) {
+      const touch = evt.touches[0];
+      pan.x = touch.clientX - startPan.x;
+      pan.y = touch.clientY - startPan.y;
+      applyZoomPan();
+    }
+  }, { passive: true });
+
+  window.addEventListener("touchend", () => {
+    if (isPanning) {
+      isPanning = false;
     }
   });
 }
@@ -240,15 +350,19 @@ function onWindowTouchMove(evt) {
 }
 
 function updateDragPosition(clientX, clientY, rect) {
-  const svgX = (clientX / rect.width) * 640;
-  const svgY = (clientY / rect.height) * 800;
+  const svgX = (clientX / rect.width) * 1600;
+  const svgY = (clientY / rect.height) * 1600;
   
-  let newX = svgX / SCALE - dragOffset.x;
-  let newY = svgY / SCALE - dragOffset.y;
+  // Traducir coordenadas de ratón considerando zoom y desplazamiento (pan)
+  let zoomX = (svgX - pan.x) / zoom;
+  let zoomY = (svgY - pan.y) / zoom;
   
-  // Limitar dentro de los bordes del plano (0 a 16m en X, 0 a 20m en Y)
-  const maxW = 16.0;
-  const maxH = 20.0;
+  let newX = zoomX / SCALE - dragOffset.x;
+  let newY = zoomY / SCALE - dragOffset.y;
+  
+  // Limitar dentro de los bordes totales del terreno (40m x 40m)
+  const maxW = 40.0;
+  const maxH = 40.0;
   const elementRadiusW = dragTarget.shape === "circle" ? dragTarget.w / 2 : dragTarget.w / 2;
   const elementRadiusH = dragTarget.shape === "circle" ? dragTarget.w / 2 : dragTarget.h / 2;
   

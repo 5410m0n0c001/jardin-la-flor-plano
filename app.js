@@ -5,7 +5,7 @@
  */
 
 import { INITIAL_ELEMENTS, FUTURE_ELEMENTS_TEMPLATES, CANVAS_WIDTH, CANVAS_HEIGHT } from "./elements.js";
-import { init2D, updateElements2D, selectElement2D, setGridSnap } from "./editor2d.js";
+import { init2D, updateElements2D, selectElement2D, setGridSnap, zoomIn, zoomOut, resetZoom } from "./editor2d.js";
 import { init3D, syncWithData, selectElement3D, resetCamera3D, destroy3D } from "./visualizer3d.js";
 
 // Estado global de la aplicación
@@ -633,4 +633,13 @@ function setupControlListeners() {
   if (btnReset) btnReset.addEventListener("click", resetLayout);
   const btnResetMob = document.getElementById("btn-reset-mob");
   if (btnResetMob) btnResetMob.addEventListener("click", resetLayout);
+
+  // Controles de Zoom del HUD en 2D
+  const btnZoomIn = document.getElementById("btn-zoom-in");
+  const btnZoomOut = document.getElementById("btn-zoom-out");
+  const btnZoomReset = document.getElementById("btn-zoom-reset");
+  
+  if (btnZoomIn) btnZoomIn.addEventListener("click", zoomIn);
+  if (btnZoomOut) btnZoomOut.addEventListener("click", zoomOut);
+  if (btnZoomReset) btnZoomReset.addEventListener("click", resetZoom);
 }

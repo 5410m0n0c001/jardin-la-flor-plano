@@ -46,7 +46,7 @@ export function init3D(containerElement, initialElements) {
   
   // 2. Cámara
   camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-  camera.position.set(8, 16, 22); // Vista oblicua aérea
+  camera.position.set(20, 22, 38); // Vista oblicua aérea del terreno completo de 40x40m
   
   // 3. Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -63,16 +63,16 @@ export function init3D(containerElement, initialElements) {
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
   controls.screenSpacePanning = false;
-  controls.minDistance = 3;
-  controls.maxDistance = 40;
+  controls.minDistance = 5;
+  controls.maxDistance = 60;
   controls.maxPolarAngle = Math.PI / 2 - 0.05; // No permitir ver por debajo del suelo
-  controls.target.set(8, 0, 10); // Enfocado en el centro del terreno de 16m x 20m
+  controls.target.set(20, 0, 20); // Enfocado en el centro del terreno (40m x 40m)
   controls.update();
   
   // 5. Luces
   setupLighting();
   
-  // 6. Terreno Base (Plano de 16m x 20m)
+  // 6. Terreno Base (Plano de 40m x 40m con salón de 16m x 20m al centro)
   createBaseFloor();
   
   // 7. Crear Aro de Selección
@@ -124,8 +124,8 @@ export function resetCamera3D() {
   // Animación suave de regreso
   const startPos = camera.position.clone();
   const startTarget = controls.target.clone();
-  const endPos = new THREE.Vector3(8, 16, 22);
-  const endTarget = new THREE.Vector3(8, 0, 10);
+  const endPos = new THREE.Vector3(20, 22, 38);
+  const endTarget = new THREE.Vector3(20, 0, 20);
   
   let t = 0;
   function transition() {
@@ -154,14 +154,14 @@ function setupLighting() {
   
   // Luz Solar / Direccional Principal (Tono Atardecer Dorado Cálido)
   const sunLight = new THREE.DirectionalLight(0xffe8d6, 0.8);
-  sunLight.position.set(12, 22, -15);
+  sunLight.position.set(25, 30, -10); // Posición superior oblicua
   sunLight.castShadow = true;
   sunLight.shadow.mapSize.width = 2048;
   sunLight.shadow.mapSize.height = 2048;
   sunLight.shadow.camera.near = 0.5;
-  sunLight.shadow.camera.far = 50;
-  // Ajustar el frustum de la sombra para cubrir el salón de 16m x 20m
-  const d = 15;
+  sunLight.shadow.camera.far = 80;
+  // Ajustar el frustum de la sombra para cubrir el terreno completo de 40m x 40m
+  const d = 25;
   sunLight.shadow.camera.left = -d;
   sunLight.shadow.camera.right = d;
   sunLight.shadow.camera.top = d;
@@ -171,19 +171,19 @@ function setupLighting() {
   
   // Luz de Acento sobre la Pista (Warm SpotLight)
   const spotLight = new THREE.SpotLight(0xa78bfa, 2.5, 15, Math.PI / 4, 0.5, 1);
-  spotLight.position.set(9, 8, 13); // Justo arriba de la pista de baile
-  spotLight.target.position.set(9, 0, 13);
+  spotLight.position.set(21, 8, 23); // Justo arriba de la pista de baile en su nueva posición
+  spotLight.target.position.set(21, 0, 23);
   spotLight.castShadow = true;
   spotLight.shadow.mapSize.width = 1024;
   spotLight.shadow.mapSize.height = 1024;
   scene.add(spotLight);
   scene.add(spotLight.target);
   
-  // Luces de Guirnalda Festivas (Pequeñas fuentes de luz cálidas por encima del salón)
+  // Luces de Guirnalda Festivas (Desplazadas +12 en X y +10 en Z)
   const lightColors = [0xfffbeb, 0xfef3c7, 0xffedd5];
   const stringPositions = [
-    { x: 5, z: 6 }, { x: 9, z: 6 }, { x: 13, z: 6 },
-    { x: 5, z: 10 }, { x: 13, z: 10 }
+    { x: 17, z: 16 }, { x: 21, z: 16 }, { x: 25, z: 16 },
+    { x: 17, z: 20 }, { x: 25, z: 20 }
   ];
   
   stringPositions.forEach((pos, idx) => {
@@ -201,23 +201,23 @@ function setupLighting() {
 }
 
 /**
- * Crea el suelo base de 16m x 20m con el área techada del salón demarcada
+ * Crea el suelo base de 40m x 40m con el área techada del salón demarcada
  */
 function createBaseFloor() {
   // A) Suelo exterior completo (Blanco/Gris Minimalista, como se pidió)
-  const groundGeom = new THREE.BoxGeometry(40, 0.2, 40); // Espacio amplio alrededor
+  const groundGeom = new THREE.BoxGeometry(40, 0.2, 40); // Espacio de 40m x 40m
   const groundMat = new THREE.MeshStandardMaterial({
     color: COLORS.floorOutdoor,
     roughness: 0.85,
     metalness: 0.05
   });
   const ground = new THREE.Mesh(groundGeom, groundMat);
-  ground.position.y = -0.1; // Nivelar superficie con y=0
+  ground.position.set(20, -0.1, 20); // Centrado en (20, 20)
   ground.receiveShadow = true;
   scene.add(ground);
   
   // B) Área del salón techada (Raise Floor / Plataforma sutilmente elevada 0.02m)
-  // De 16m de ancho (0 a 16) y 20m de largo (0 a 20)
+  // De 16m de ancho y 20m de largo, centrada en (20, 20)
   const salonFloorGeom = new THREE.BoxGeometry(16, 0.02, 20);
   const salonFloorMat = new THREE.MeshStandardMaterial({
     color: 0xe2e8f0, // Azulejo gris/beige satinado
@@ -225,29 +225,28 @@ function createBaseFloor() {
     metalness: 0.1
   });
   const salonFloor = new THREE.Mesh(salonFloorGeom, salonFloorMat);
-  salonFloor.position.set(8, 0.01, 10); // El centro de (0-16, 0-20) es (8, 10)
+  salonFloor.position.set(20, 0.01, 20); // Centrado en (20, 20)
   salonFloor.receiveShadow = true;
   scene.add(salonFloor);
   
-  // Añadir cuadrícula del azulejo interna mediante texturas procedurales sencillas
-  const gridHelper = new THREE.GridHelper(20, 20, 0x94a3b8, 0xcbd5e1);
-  gridHelper.position.set(8, 0.021, 10);
+  // Añadir cuadrícula del terreno completo (40m x 40m)
+  const gridHelper = new THREE.GridHelper(40, 40, 0x94a3b8, 0xcbd5e1);
+  gridHelper.position.set(20, 0.021, 20);
   gridHelper.material.opacity = 0.15;
   gridHelper.material.transparent = true;
   scene.add(gridHelper);
   
-  // Columnas/Paredes perimetrales del área techada (para dar realismo arquitectónico)
-  // Dibujamos las columnas en las esquinas y bordes del salón de 16x20m
+  // Columnas/Paredes perimetrales del área techada (SALON_X=12 a 28, SALON_Y=10 a 30)
   const colGeom = new THREE.BoxGeometry(0.4, 4.0, 0.4);
   const colMat = new THREE.MeshStandardMaterial({ color: COLORS.walls, roughness: 0.7 });
   
   const colPositions = [
-    { x: 0.2, z: 0.2 },
-    { x: 15.8, z: 0.2 },
-    { x: 0.2, z: 19.8 },
-    { x: 15.8, z: 19.8 },
-    { x: 0.2, z: 10 },
-    { x: 15.8, z: 10 }
+    { x: 12.2, z: 10.2 },
+    { x: 27.8, z: 10.2 },
+    { x: 12.2, z: 29.8 },
+    { x: 27.8, z: 29.8 },
+    { x: 12.2, z: 20.0 },
+    { x: 27.8, z: 20.0 }
   ];
   
   colPositions.forEach(pos => {

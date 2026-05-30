@@ -536,6 +536,40 @@ body {
   transform: translateY(-1px);
 }
 
+.hud-zoom-controls {
+  display: flex;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.hud-btn-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-color);
+  color: var(--color-gold);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.hud-btn-circle:hover {
+  background: var(--color-gold);
+  color: #000;
+  border-color: var(--color-gold);
+  transform: scale(1.05);
+}
+
+.hud-btn-circle:active {
+  transform: scale(0.95);
+}
+
 /* ==========================================
    7. INSPECTOR DE PROPIEDADES (DERECHA)
    ========================================== */

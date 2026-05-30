@@ -144,7 +144,7 @@
         <div id="container-2d" class="canvas-container active">
           <div class="canvas-wrapper">
             <!-- El SVG interactivo se genera/controla aquí -->
-            <svg id="svg-canvas" viewBox="0 0 640 800" width="100%" height="100%">
+            <svg id="svg-canvas" viewBox="0 0 1600 1600" width="100%" height="100%">
               <!-- Definiciones de patrones y filtros -->
               <defs>
                 <!-- Patrón de rejilla en metros (1m = 40px) -->
@@ -171,34 +171,45 @@
                 </filter>
               </defs>
               
-              <!-- Fondo del terreno (En blanco por defecto, tal como se solicitó) -->
-              <rect width="640" height="800" fill="#171923" />
+              <!-- Fondo del terreno completo de 40x40m (blanco/gris oscuro minimalista) -->
+              <rect width="1600" height="1600" fill="#171923" />
               
-              <!-- Capa de Rejilla -->
-              <rect id="canvas-grid" width="640" height="800" fill="url(#grid-pattern)" />
+              <!-- Capa de Rejilla del Terreno Completo -->
+              <rect id="canvas-grid" width="1600" height="1600" fill="url(#grid-pattern)" />
               
-              <!-- Área Techada / Salón Base (Delimitada por las medidas del plano 16m x 20m) -->
-              <!-- Nota: Para dar una sensación arquitectónica, dibujamos el perímetro del salón de 16m x 20m -->
-              <rect x="0" y="0" width="640" height="800" fill="none" stroke="rgba(212, 175, 55, 0.15)" stroke-width="4" stroke-dasharray="10,5" />
-              
-              <!-- Elementos interactivos se añadirán dinámicamente aquí -->
-              <g id="svg-elements-group"></g>
-              
-              <!-- Indicadores de Dimensiones Externas -->
-              <g id="svg-dimensions-group" class="dimensions-labels">
-                <!-- Cota Horizontal (16.00 m) -->
-                <line x1="0" y1="785" x2="640" y2="785" stroke="#d4af37" stroke-width="1.5" />
-                <line x1="0" y1="775" x2="0" y2="795" stroke="#d4af37" stroke-width="1.5" />
-                <line x1="640" y1="775" x2="640" y2="795" stroke="#d4af37" stroke-width="1.5" />
-                <rect x="280" y="773" width="80" height="24" rx="4" fill="#1f2937" stroke="#d4af37" stroke-width="1"/>
-                <text x="320" y="789" text-anchor="middle" fill="#d4af37" font-weight="600" font-size="11">16.00 m</text>
+              <!-- El grupo que almacena las transformaciones de Zoom y Panning (Desplazamiento) -->
+              <g id="svg-zoom-group">
                 
-                <!-- Cota Vertical (20.00 m) -->
-                <line x1="625" y1="0" x2="625" y2="800" stroke="#d4af37" stroke-width="1.5" />
-                <line x1="615" y1="0" x2="635" y2="0" stroke="#d4af37" stroke-width="1.5" />
-                <line x1="615" y1="800" x2="635" y2="800" stroke="#d4af37" stroke-width="1.5" />
-                <rect x="613" y="388" width="24" height="80" rx="4" fill="#1f2937" stroke="#d4af37" stroke-width="1" transform="rotate(-90 625 428)"/>
-                <text x="625" y="432" text-anchor="middle" fill="#d4af37" font-weight="600" font-size="11" transform="rotate(-90 625 428)">20.00 m</text>
+                <!-- Delimitación Perimetral del Terreno Completo (40m x 40m) -->
+                <rect x="0" y="0" width="1600" height="1600" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
+                
+                <!-- Delimitación Perimetral del Salón Techado en el centro (12m a 28m en X, 10m a 30m en Y) -->
+                <!-- En píxeles: X: 12*40 = 480, Y: 10*40 = 400. Ancho: 16*40 = 640, Alto: 20*40 = 800 -->
+                <rect x="480" y="400" width="640" height="800" fill="rgba(30, 41, 59, 0.4)" stroke="#d4af37" stroke-width="4" stroke-dasharray="12,6" />
+                
+                <!-- Elementos interactivos se añadirán dinámicamente aquí -->
+                <g id="svg-elements-group"></g>
+                
+                <!-- Indicadores de Dimensiones Externas del Terreno (40m x 40m) -->
+                <g id="svg-dimensions-group" class="dimensions-labels">
+                  <!-- Cota Horizontal (40.00 m) -->
+                  <line x1="0" y1="1580" x2="1600" y2="1580" stroke="#d4af37" stroke-width="3" />
+                  <line x1="0" y1="1560" x2="0" y2="1600" stroke="#d4af37" stroke-width="3" />
+                  <line x1="1600" y1="1560" x2="1600" y2="1600" stroke="#d4af37" stroke-width="3" />
+                  <rect x="740" y="1555" width="120" height="40" rx="8" fill="#0f172a" stroke="#d4af37" stroke-width="2"/>
+                  <text x="800" y="1582" text-anchor="middle" fill="#d4af37" font-weight="700" font-size="20">40.00 m</text>
+                  
+                  <!-- Cota Vertical (40.00 m) -->
+                  <line x1="1580" y1="0" x2="1580" y2="1600" stroke="#d4af37" stroke-width="3" />
+                  <line x1="1560" y1="0" x2="1600" y2="0" stroke="#d4af37" stroke-width="3" />
+                  <line x1="1560" y1="1600" x2="1600" y2="1600" stroke="#d4af37" stroke-width="3" />
+                  <rect x="1555" y="740" width="40" height="120" rx="8" fill="#0f172a" stroke="#d4af37" stroke-width="2" transform="rotate(-90 1580 800)"/>
+                  <text x="1580" y="808" text-anchor="middle" fill="#d4af37" font-weight="700" font-size="20" transform="rotate(-90 1580 800)">40.00 m</text>
+                  
+                  <!-- Etiqueta del Salón Techado central -->
+                  <rect x="700" y="350" width="200" height="35" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                  <text x="800" y="372" text-anchor="middle" fill="#ffffff" font-weight="600" font-size="14">SALÓN TECHADO (16x20m)</text>
+                </g>
               </g>
             </svg>
           </div>
@@ -206,6 +217,11 @@
           <!-- Controles de Zoom 2D -->
           <div class="canvas-hud">
             <span class="hud-scale"><i class="fa-solid fa-ruler-combined"></i> Escala: 1m = 40px</span>
+            <div class="hud-zoom-controls">
+              <button id="btn-zoom-in" class="hud-btn-circle" title="Acercar"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+              <button id="btn-zoom-out" class="hud-btn-circle" title="Alejar"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+              <button id="btn-zoom-reset" class="hud-btn-circle" title="Restaurar Vista 2D"><i class="fa-solid fa-expand"></i></button>
+            </div>
             <span id="coord-hud" class="hud-coords"><i class="fa-solid fa-crosshairs"></i> X: 0.0m, Y: 0.0m</span>
           </div>
         </div>

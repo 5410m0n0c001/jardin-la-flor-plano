@@ -654,6 +654,24 @@ function setupControlListeners() {
   
   if (btnShare) btnShare.addEventListener("click", sharePlan);
   if (btnShareMob) btnShareMob.addEventListener("click", sharePlan);
+
+  // Imprimir Plano (PDF)
+  const btnPrint = document.getElementById("btn-print");
+  const btnPrintMob = document.getElementById("btn-print-mob");
+
+  const triggerPrint = () => {
+    // Sincronizar y forzar la actualización del plano 2D antes de imprimir
+    // para asegurar que los elementos desplazados queden reflejados en el SVG
+    updateElements2D(state.elements);
+    
+    // Un brevísimo tiempo de espera para que se renderice en el DOM antes de disparar la impresión
+    setTimeout(() => {
+      window.print();
+    }, 50);
+  };
+
+  if (btnPrint) btnPrint.addEventListener("click", triggerPrint);
+  if (btnPrintMob) btnPrintMob.addEventListener("click", triggerPrint);
 }
 
 /**

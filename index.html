@@ -86,6 +86,10 @@
           <button id="btn-share" class="btn-action btn-share" title="Compartir Plano Interactivo">
             <i class="fa-solid fa-share-nodes"></i> <span class="hide-mobile">Compartir</span>
           </button>
+
+          <button id="btn-print" class="btn-action btn-info" title="Imprimir Plano o Guardar como PDF">
+            <i class="fa-solid fa-print"></i> <span>Imprimir Plano</span>
+          </button>
           
           <button id="btn-reset" class="btn-action btn-danger" title="Reiniciar al Plano Original">
             <i class="fa-solid fa-rotate-left"></i> <span class="hide-mobile">Reiniciar</span>
@@ -124,6 +128,9 @@
               </button>
               <button id="btn-share-mob" class="btn-action-mobile btn-share-mobile" title="Compartir Plano">
                 <i class="fa-solid fa-share-nodes"></i> Compartir Plano
+              </button>
+              <button id="btn-print-mob" class="btn-action-mobile btn-info-mobile" title="Imprimir Plano / PDF">
+                <i class="fa-solid fa-print"></i> Imprimir Plano
               </button>
             </div>
             <div class="divider-horizontal"></div>
@@ -195,7 +202,7 @@
               </defs>
               
               <!-- Fondo del terreno completo de 40x40m (blanco/gris oscuro minimalista) -->
-              <rect width="1600" height="1600" fill="#171923" />
+              <rect id="canvas-bg" width="1600" height="1600" fill="#171923" />
               
               <!-- Capa de Rejilla del Terreno Completo -->
               <rect id="canvas-grid" width="1600" height="1600" fill="url(#grid-pattern)" />
@@ -204,11 +211,11 @@
               <g id="svg-zoom-group">
                 
                 <!-- Delimitación Perimetral del Terreno Completo (40m x 40m) -->
-                <rect x="0" y="0" width="1600" height="1600" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
+                <rect id="canvas-border" x="0" y="0" width="1600" height="1600" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
                 
                 <!-- Delimitación Perimetral del Salón Techado en el centro (12m a 28m en X, 10m a 30m en Y) -->
                 <!-- En píxeles: X: 12*40 = 480, Y: 10*40 = 400. Ancho: 16*40 = 640, Alto: 20*40 = 800 -->
-                <rect x="480" y="400" width="640" height="800" fill="rgba(30, 41, 59, 0.4)" stroke="#d4af37" stroke-width="4" stroke-dasharray="12,6" />
+                <rect id="salon-techado-boundary" x="480" y="400" width="640" height="800" fill="rgba(30, 41, 59, 0.4)" stroke="#d4af37" stroke-width="4" stroke-dasharray="12,6" />
                 
                 <!-- Elementos interactivos se añadirán dinámicamente aquí -->
                 <g id="svg-elements-group"></g>

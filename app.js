@@ -4,9 +4,9 @@
  * Conecta el editor 2D, visor 3D, panel de propiedades e importador/exportador.
  */
 
-import { INITIAL_ELEMENTS, FUTURE_ELEMENTS_TEMPLATES, CANVAS_WIDTH, CANVAS_HEIGHT } from "./elements.js";
-import { init2D, updateElements2D, selectElement2D, setGridSnap, zoomIn, zoomOut, resetZoom } from "./editor2d.js";
-import { init3D, syncWithData, selectElement3D, resetCamera3D, destroy3D } from "./visualizer3d.js";
+import { INITIAL_ELEMENTS, FUTURE_ELEMENTS_TEMPLATES, CANVAS_WIDTH, CANVAS_HEIGHT } from "./elements.js?v=2.0";
+import { init2D, updateElements2D, selectElement2D, setGridSnap, zoomIn, zoomOut, resetZoom } from "./editor2d.js?v=2.0";
+import { init3D, syncWithData, selectElement3D, resetCamera3D, destroy3D } from "./visualizer3d.js?v=2.0";
 
 // Estado global de la aplicación
 const state = {

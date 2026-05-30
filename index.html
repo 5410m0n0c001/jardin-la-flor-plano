@@ -36,6 +36,14 @@
       
       <!-- Controles de Vista y Herramientas -->
       <div class="header-controls">
+        <!-- Botones de Alternancia para Móviles -->
+        <button id="btn-toggle-left" class="btn-mobile-toggle hide-desktop" title="Mostrar Elementos">
+          <i class="fa-solid fa-toolbox"></i> <span>Elementos</span>
+        </button>
+        <button id="btn-toggle-right" class="btn-mobile-toggle hide-desktop" title="Mostrar Propiedades">
+          <i class="fa-solid fa-sliders"></i> <span>Propiedades</span>
+        </button>
+        
         <div class="view-toggle-group">
           <button id="btn-view-2d" class="btn-toggle active" title="Vista en Planta 2D">
             <i class="fa-solid fa-map"></i> <span>Vista 2D</span>
@@ -309,9 +317,10 @@
       <div class="footer-segment text-right hide-mobile">
         <span id="element-count-badge">Elementos: 16</span>
       </div>
-    </footer>
-    
   </div>
+  
+  <!-- Capa overlay de fondo para menús móviles -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
   
   <!-- Carga de librerías Three.js mediante CDN para soporte 3D fotorrealista -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

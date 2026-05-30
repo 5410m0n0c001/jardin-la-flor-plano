@@ -164,6 +164,7 @@ function render() {
  * Configura los eventos de arrastre para un grupo
  */
 function setupDragEvents(group, elem) {
+  // A) Arrastre con ratón (Desktop)
   group.addEventListener("mousedown", (evt) => {
     evt.stopPropagation();
     selectedElementId = elem.id;
@@ -183,6 +184,33 @@ function setupDragEvents(group, elem) {
     window.addEventListener("mousemove", onWindowMouseMove);
     window.addEventListener("mouseup", onWindowMouseUp);
   });
+
+  // B) Arrastre táctil (Móvil)
+  group.addEventListener("touchstart", (evt) => {
+    if (evt.touches.length > 1) return; // Ignorar multi-touch para evitar conflictos
+    evt.stopPropagation();
+    
+    const touch = evt.touches[0];
+    selectedElementId = elem.id;
+    isDragging = true;
+    dragTarget = elem;
+    
+    const fakeEvent = {
+      clientX: touch.clientX,
+      clientY: touch.clientY
+    };
+    
+    const mouseCoords = getMouseCoords(fakeEvent);
+    dragOffset.x = mouseCoords.mX - elem.x;
+    dragOffset.y = mouseCoords.mY - elem.y;
+    
+    if (onSelectedCallback) onSelectedCallback(elem);
+    
+    selectElement2D(elem.id);
+    
+    window.addEventListener("touchmove", onWindowTouchMove, { passive: false });
+    window.addEventListener("touchend", onWindowTouchEnd);
+  });
 }
 
 function onWindowMouseMove(evt) {
@@ -192,8 +220,28 @@ function onWindowMouseMove(evt) {
   const x = evt.clientX - rect.left;
   const y = evt.clientY - rect.top;
   
-  const svgX = (x / rect.width) * 640;
-  const svgY = (y / rect.height) * 800;
+  updateDragPosition(x, y, rect);
+}
+
+function onWindowTouchMove(evt) {
+  if (!isDragging || !dragTarget) return;
+  
+  // Evitar que la pantalla se desplace mientras se arrastra una mesa
+  evt.preventDefault();
+  
+  if (evt.touches.length === 0) return;
+  const touch = evt.touches[0];
+  
+  const rect = activeSvg.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+  
+  updateDragPosition(x, y, rect);
+}
+
+function updateDragPosition(clientX, clientY, rect) {
+  const svgX = (clientX / rect.width) * 640;
+  const svgY = (clientY / rect.height) * 800;
   
   let newX = svgX / SCALE - dragOffset.x;
   let newY = svgY / SCALE - dragOffset.y;
@@ -241,6 +289,17 @@ function onWindowMouseUp() {
     render(); // Re-dibujar completamente al soltar para alinear sillas correctamente
   }
 }
+
+function onWindowTouchEnd() {
+  if (isDragging) {
+    isDragging = false;
+    dragTarget = null;
+    window.removeEventListener("touchmove", onWindowTouchMove);
+    window.removeEventListener("touchend", onWindowTouchEnd);
+    render(); // Re-dibujar completamente
+  }
+}
+
 
 /* ==========================================
    MÉTODOS DE RENDERIZADO SVG DE COMPONENTES

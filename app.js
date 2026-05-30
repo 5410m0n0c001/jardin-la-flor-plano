@@ -86,6 +86,43 @@ function setupUI() {
       resetCamera3D();
     }
   });
+
+  // --- Lógica de Menús Colapsables (Mobile Drawer Overlay) ---
+  const btnToggleLeft = document.getElementById("btn-toggle-left");
+  const btnToggleRight = document.getElementById("btn-toggle-right");
+  const sidebarLeft = document.querySelector(".sidebar-left");
+  const sidebarRight = document.querySelector(".sidebar-right");
+  const sidebarOverlay = document.getElementById("sidebar-overlay");
+
+  const closeMobileSidebars = () => {
+    sidebarLeft.classList.remove("open");
+    sidebarRight.classList.remove("open");
+    sidebarOverlay.classList.remove("active");
+  };
+
+  if (btnToggleLeft && btnToggleRight && sidebarLeft && sidebarRight && sidebarOverlay) {
+    btnToggleLeft.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = sidebarLeft.classList.contains("open");
+      closeMobileSidebars();
+      if (!isOpen) {
+        sidebarLeft.classList.add("open");
+        sidebarOverlay.classList.add("active");
+      }
+    });
+
+    btnToggleRight.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = sidebarRight.classList.contains("open");
+      closeMobileSidebars();
+      if (!isOpen) {
+        sidebarRight.classList.add("open");
+        sidebarOverlay.classList.add("active");
+      }
+    });
+
+    sidebarOverlay.addEventListener("click", closeMobileSidebars);
+  }
 }
 
 /**
@@ -217,6 +254,18 @@ function handleElementSelected(element) {
   noSelectionMsg.style.display = "none";
   inspectorForm.style.display = "flex";
   
+  // Abrir de forma automatizada el panel de propiedades en móviles al seleccionar
+  if (element && window.innerWidth <= 950) {
+    const sidebarLeft = document.querySelector(".sidebar-left");
+    const sidebarRight = document.querySelector(".sidebar-right");
+    const sidebarOverlay = document.getElementById("sidebar-overlay");
+    if (sidebarRight && sidebarOverlay) {
+      if (sidebarLeft) sidebarLeft.classList.remove("open");
+      sidebarRight.classList.add("open");
+      sidebarOverlay.classList.add("active");
+    }
+  }
+
   // Rellenar valores en el formulario
   document.getElementById("elem-name").value = element.name;
   document.getElementById("elem-x").value = element.x;

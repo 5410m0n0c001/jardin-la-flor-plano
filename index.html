@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salón Jardín La Flor | Planificador Interactivo 2D y 3D</title>
+  <meta name="description" content="Diseñador y planificador interactivo en 2D y 3D para el Salón Jardín La Flor. Organice mesas cuadradas, la pista de baile, cabina de DJ y proyecte futuros elementos exteriores como estacionamientos y capillas.">
+  
+  <!-- Tipografía Outfit de Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome para Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Hojas de Estilo -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  
+  <!-- Contenedor Principal (Dashboard) -->
+  <div class="app-container">
+    
+    <!-- Barra de Navegación / Header Superior -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <i class="fa-solid fa-leaf"></i>
+        </div>
+        <div class="logo-text">
+          <h1>Jardín La Flor</h1>
+          <span>Planificador Interactivo 2D & 3D</span>
+        </div>
+      </div>
+      
+      <!-- Controles de Vista y Herramientas -->
+      <div class="header-controls">
+        <div class="view-toggle-group">
+          <button id="btn-view-2d" class="btn-toggle active" title="Vista en Planta 2D">
+            <i class="fa-solid fa-map"></i> <span>Vista 2D</span>
+          </button>
+          <button id="btn-view-3d" class="btn-toggle" title="Proyección Realista 3D">
+            <i class="fa-solid fa-cube"></i> <span>Proyección 3D</span>
+          </button>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="action-buttons">
+          <button id="btn-grid" class="btn-action active" title="Mostrar/Ocultar Rejilla Magnética">
+            <i class="fa-solid fa-border-all"></i> <span class="hide-mobile">Rejilla</span>
+          </button>
+          <button id="btn-export" class="btn-action btn-success" title="Exportar Distribución (JSON)">
+            <i class="fa-solid fa-download"></i> <span>Guardar</span>
+          </button>
+          <button id="btn-import-trigger" class="btn-action" title="Cargar Distribución (JSON)">
+            <i class="fa-solid fa-upload"></i> <span>Cargar</span>
+          </button>
+          <input type="file" id="file-import" accept=".json" style="display: none;">
+          
+          <button id="btn-reset" class="btn-action btn-danger" title="Reiniciar al Plano Original">
+            <i class="fa-solid fa-rotate-left"></i> <span class="hide-mobile">Reiniciar</span>
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Cuerpo de la Aplicación -->
+    <main class="app-body">
+      
+      <!-- Panel Izquierdo: Caja de Herramientas (Toolbox) -->
+      <aside class="sidebar sidebar-left">
+        <div class="sidebar-header">
+          <i class="fa-solid fa-toolbox"></i>
+          <h2>Agregar Elementos</h2>
+        </div>
+        
+        <div class="sidebar-scroll">
+          <!-- Sección 1: Elementos del Salón -->
+          <div class="toolbox-group">
+            <h3>Elementos del Salón</h3>
+            <p class="group-desc">Añada mesas y elementos clave al área techada.</p>
+            <div class="toolbox-grid" id="tools-salon">
+              <!-- Cargado dinámicamente desde elements.js -->
+            </div>
+          </div>
+          
+          <!-- Sección 2: Futuros Elementos Alrededor -->
+          <div class="toolbox-group">
+            <h3>Futuros Elementos Exteriores</h3>
+            <p class="group-desc">Agregue elementos de entorno en el área libre exterior.</p>
+            <div class="toolbox-grid" id="tools-future">
+              <!-- Cargado dinámicamente desde elements.js -->
+            </div>
+          </div>
+          
+          <!-- Sección 3: Ayuda Rápida -->
+          <div class="toolbox-group instructions-card">
+            <h3><i class="fa-solid fa-circle-info"></i> ¿Cómo usar?</h3>
+            <ul>
+              <li><strong>Arrastrar:</strong> Mueva cualquier elemento dentro del plano.</li>
+              <li><strong>Seleccionar:</strong> Toque un elemento para editar sus propiedades.</li>
+              <li><strong>Rotar:</strong> Use los controles del inspector de la derecha.</li>
+              <li><strong>3D:</strong> Cambie a proyección 3D para volar por el salón.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Área Central: Workspace (El Plano de Dibujo) -->
+      <section class="workspace">
+        
+        <!-- Vista 2D (SVG) -->
+        <div id="container-2d" class="canvas-container active">
+          <div class="canvas-wrapper">
+            <!-- El SVG interactivo se genera/controla aquí -->
+            <svg id="svg-canvas" viewBox="0 0 640 800" width="100%" height="100%">
+              <!-- Definiciones de patrones y filtros -->
+              <defs>
+                <!-- Patrón de rejilla en metros (1m = 40px) -->
+                <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1" />
+                  <path d="M 200 0 L 0 0 0 200" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
+                </pattern>
+                
+                <!-- Patrón de Pasto para el Jardín -->
+                <pattern id="grass-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <rect width="20" height="20" fill="#2d6a4f" />
+                  <circle cx="5" cy="5" r="1.5" fill="#40916c" opacity="0.6"/>
+                  <circle cx="15" cy="15" r="1" fill="#1b4332" opacity="0.8"/>
+                </pattern>
+                
+                <!-- Sombra suave para elementos draggeables -->
+                <filter id="drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.35"/>
+                </filter>
+                
+                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+              
+              <!-- Fondo del terreno (En blanco por defecto, tal como se solicitó) -->
+              <rect width="640" height="800" fill="#171923" />
+              
+              <!-- Capa de Rejilla -->
+              <rect id="canvas-grid" width="640" height="800" fill="url(#grid-pattern)" />
+              
+              <!-- Área Techada / Salón Base (Delimitada por las medidas del plano 16m x 20m) -->
+              <!-- Nota: Para dar una sensación arquitectónica, dibujamos el perímetro del salón de 16m x 20m -->
+              <rect x="0" y="0" width="640" height="800" fill="none" stroke="rgba(212, 175, 55, 0.15)" stroke-width="4" stroke-dasharray="10,5" />
+              
+              <!-- Elementos interactivos se añadirán dinámicamente aquí -->
+              <g id="svg-elements-group"></g>
+              
+              <!-- Indicadores de Dimensiones Externas -->
+              <g id="svg-dimensions-group" class="dimensions-labels">
+                <!-- Cota Horizontal (16.00 m) -->
+                <line x1="0" y1="785" x2="640" y2="785" stroke="#d4af37" stroke-width="1.5" />
+                <line x1="0" y1="775" x2="0" y2="795" stroke="#d4af37" stroke-width="1.5" />
+                <line x1="640" y1="775" x2="640" y2="795" stroke="#d4af37" stroke-width="1.5" />
+                <rect x="280" y="773" width="80" height="24" rx="4" fill="#1f2937" stroke="#d4af37" stroke-width="1"/>
+                <text x="320" y="789" text-anchor="middle" fill="#d4af37" font-weight="600" font-size="11">16.00 m</text>
+                
+                <!-- Cota Vertical (20.00 m) -->
+                <line x1="625" y1="0" x2="625" y2="800" stroke="#d4af37" stroke-width="1.5" />
+                <line x1="615" y1="0" x2="635" y2="0" stroke="#d4af37" stroke-width="1.5" />
+                <line x1="615" y1="800" x2="635" y2="800" stroke="#d4af37" stroke-width="1.5" />
+                <rect x="613" y="388" width="24" height="80" rx="4" fill="#1f2937" stroke="#d4af37" stroke-width="1" transform="rotate(-90 625 428)"/>
+                <text x="625" y="432" text-anchor="middle" fill="#d4af37" font-weight="600" font-size="11" transform="rotate(-90 625 428)">20.00 m</text>
+              </g>
+            </svg>
+          </div>
+          
+          <!-- Controles de Zoom 2D -->
+          <div class="canvas-hud">
+            <span class="hud-scale"><i class="fa-solid fa-ruler-combined"></i> Escala: 1m = 40px</span>
+            <span id="coord-hud" class="hud-coords"><i class="fa-solid fa-crosshairs"></i> X: 0.0m, Y: 0.0m</span>
+          </div>
+        </div>
+        
+        <!-- Vista 3D (WebGL) -->
+        <div id="container-3d" class="canvas-container">
+          <!-- Three.js Canvas se insertará aquí -->
+          
+          <div class="canvas-hud">
+            <span class="hud-scale"><i class="fa-solid fa-arrows-spin"></i> Clic Izq: Rotar | Clic Der: Desplazar | Rueda: Zoom</span>
+            <button id="btn-reset-cam-3d" class="hud-btn" title="Restaurar Cámara 3D">
+              <i class="fa-solid fa-camera"></i> Cámara Defecto
+            </button>
+          </div>
+        </div>
+        
+      </section>
+      
+      <!-- Panel Derecho: Inspector de Propiedades (Inspector) -->
+      <aside class="sidebar sidebar-right" id="property-inspector">
+        <div class="sidebar-header">
+          <i class="fa-solid fa-sliders"></i>
+          <h2>Propiedades</h2>
+        </div>
+        
+        <!-- Contenido dinámico del inspector -->
+        <div class="sidebar-scroll" id="inspector-content">
+          <!-- Si no hay elemento seleccionado -->
+          <div class="no-selection" id="no-selection-msg">
+            <div class="no-sel-icon">
+              <i class="fa-solid fa-arrow-pointer"></i>
+            </div>
+            <p>Seleccione un elemento del plano para ver o editar sus propiedades arquitectónicas.</p>
+          </div>
+          
+          <!-- Formulario del Inspector (Oculto inicialmente) -->
+          <div class="inspector-form" id="inspector-form" style="display: none;">
+            <div class="input-group">
+              <label for="elem-name">Nombre del Elemento</label>
+              <input type="text" id="elem-name">
+            </div>
+            
+            <div class="input-row">
+              <div class="input-group">
+                <label for="elem-x">Posición X (m)</label>
+                <input type="number" id="elem-x" step="0.1" min="0" max="16">
+              </div>
+              <div class="input-group">
+                <label for="elem-y">Posición Y (m)</label>
+                <input type="number" id="elem-y" step="0.1" min="0" max="20">
+              </div>
+            </div>
+            
+            <div class="input-row">
+              <div class="input-group">
+                <label for="elem-w">Ancho / Diám. (m)</label>
+                <input type="number" id="elem-w" step="0.1" min="0.5" max="16">
+              </div>
+              <div id="group-elem-h" class="input-group">
+                <label for="elem-h">Largo (m)</label>
+                <input type="number" id="elem-h" step="0.1" min="0.5" max="20">
+              </div>
+            </div>
+            
+            <div class="input-group">
+              <label for="elem-rotation">Rotación (°)</label>
+              <div class="rotation-slider-wrapper">
+                <input type="range" id="elem-rotation" min="0" max="360" step="15">
+                <span id="rotation-val">0°</span>
+              </div>
+              <div class="rotation-quick-buttons">
+                <button type="button" class="btn-rotate-quick" data-deg="0">0°</button>
+                <button type="button" class="btn-rotate-quick" data-deg="90">90°</button>
+                <button type="button" class="btn-rotate-quick" data-deg="180">180°</button>
+                <button type="button" class="btn-rotate-quick" data-deg="270">270°</button>
+              </div>
+            </div>
+            
+            <!-- Campo específico para mesas: Cantidad de sillas -->
+            <div class="input-group" id="group-elem-chairs" style="display: none;">
+              <label for="elem-chairs">Número de Sillas</label>
+              <input type="number" id="elem-chairs" min="2" max="16" step="1">
+            </div>
+            
+            <!-- Campo específico para mesas: Forma (Cuadrada vs Circular) -->
+            <div class="input-group" id="group-elem-shape" style="display: none;">
+              <label>Forma de la Mesa</label>
+              <div class="shape-toggle-group">
+                <button type="button" class="btn-shape-toggle" id="btn-shape-square" data-shape="square">
+                  <i class="fa-regular fa-square"></i> Cuadrada
+                </button>
+                <button type="button" class="btn-shape-toggle" id="btn-shape-circle" data-shape="circle">
+                  <i class="fa-regular fa-circle"></i> Redonda
+                </button>
+              </div>
+            </div>
+            
+            <!-- Color del Elemento -->
+            <div class="input-group">
+              <label for="elem-color">Color Visual</label>
+              <div class="color-picker-wrapper">
+                <input type="color" id="elem-color">
+                <input type="text" id="elem-color-hex" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
+              </div>
+            </div>
+            
+            <div class="action-buttons-vertical">
+              <button type="button" id="btn-duplicate-elem" class="btn-inspector-action btn-info">
+                <i class="fa-solid fa-copy"></i> Duplicar Elemento
+              </button>
+              <button type="button" id="btn-delete-elem" class="btn-inspector-action btn-danger">
+                <i class="fa-solid fa-trash-can"></i> Eliminar Elemento
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+      
+    </main>
+    
+    <!-- Barra de Estado / Info Footer -->
+    <footer class="app-footer">
+      <div class="footer-segment">
+        <span class="badge badge-primary">Salón: 16 x 20 m</span>
+        <span class="badge badge-accent">Área Techada: 320 m²</span>
+      </div>
+      <div class="footer-segment text-center">
+        <span>Diseñado para Salón Jardín La Flor © 2026. Todos los derechos reservados.</span>
+      </div>
+      <div class="footer-segment text-right hide-mobile">
+        <span id="element-count-badge">Elementos: 16</span>
+      </div>
+    </footer>
+    
+  </div>
+  
+  <!-- Carga de librerías Three.js mediante CDN para soporte 3D fotorrealista -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  
+  <!-- Módulos de la Aplicación -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

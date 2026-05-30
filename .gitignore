@@ -1,0 +1,30 @@
+# Git ignore for Jardin La Flor Floor Plan Project
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+
+# System Files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Node / Packaging
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Local Configuration
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

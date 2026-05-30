@@ -6,6 +6,22 @@
   <title>Salón Jardín La Flor | Planificador Interactivo 2D y 3D</title>
   <meta name="description" content="Diseñador y planificador interactivo en 2D y 3D para el Salón Jardín La Flor. Organice mesas cuadradas, la pista de baile, cabina de DJ y proyecte futuros elementos exteriores como estacionamientos y capillas.">
   
+  <!-- Metadatos Open Graph (Facebook, WhatsApp, Telegram) -->
+  <meta property="og:title" content="Salón Jardín La Flor | Planificador Interactivo 2D y 3D">
+  <meta property="og:description" content="Diseña, planifica y personaliza de manera interactiva la distribución de mesas, pista de baile y áreas exteriores del Salón Jardín La Flor en 2D y 3D. ¡Comparte tu diseño al instante!">
+  <meta property="og:image" content="https://5410m0n0c001.github.io/jardin-la-flor-plano/imagendestacada.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:url" content="https://5410m0n0c001.github.io/jardin-la-flor-plano/">
+  <meta property="og:type" content="website">
+
+  <!-- Metadatos Twitter Cards (Twitter / X) -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Salón Jardín La Flor | Planificador Interactivo 2D y 3D">
+  <meta name="twitter:description" content="Diseña, planifica y personaliza de manera interactiva la distribución de mesas, pista de baile y áreas exteriores del Salón Jardín La Flor en 2D y 3D. ¡Comparte tu diseño al instante!">
+  <meta name="twitter:image" content="https://5410m0n0c001.github.io/jardin-la-flor-plano/imagendestacada.png">
+
   <!-- Tipografía Outfit de Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,6 +83,10 @@
           </button>
           <input type="file" id="file-import" accept=".json" style="display: none;">
           
+          <button id="btn-share" class="btn-action btn-share" title="Compartir Plano Interactivo">
+            <i class="fa-solid fa-share-nodes"></i> <span class="hide-mobile">Compartir</span>
+          </button>
+          
           <button id="btn-reset" class="btn-action btn-danger" title="Reiniciar al Plano Original">
             <i class="fa-solid fa-rotate-left"></i> <span class="hide-mobile">Reiniciar</span>
           </button>
@@ -101,6 +121,9 @@
               </button>
               <button id="btn-reset-mob" class="btn-action-mobile btn-danger-mobile" title="Reiniciar">
                 <i class="fa-solid fa-rotate-left"></i> Reiniciar
+              </button>
+              <button id="btn-share-mob" class="btn-action-mobile btn-share-mobile" title="Compartir Plano">
+                <i class="fa-solid fa-share-nodes"></i> Compartir Plano
               </button>
             </div>
             <div class="divider-horizontal"></div>
@@ -362,10 +385,14 @@
       <div class="footer-segment text-right hide-mobile">
         <span id="element-count-badge">Elementos: 16</span>
       </div>
+    </footer>
   </div>
   
   <!-- Capa overlay de fondo para menús móviles -->
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  
+  <!-- Contenedor para notificaciones Toast flotantes -->
+  <div id="toast" class="toast-notification"></div>
   
   <!-- Carga de librerías Three.js mediante CDN para soporte 3D fotorrealista -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

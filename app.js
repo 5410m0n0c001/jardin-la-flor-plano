@@ -642,4 +642,64 @@ function setupControlListeners() {
   if (btnZoomIn) btnZoomIn.addEventListener("click", zoomIn);
   if (btnZoomOut) btnZoomOut.addEventListener("click", zoomOut);
   if (btnZoomReset) btnZoomReset.addEventListener("click", resetZoom);
+
+  // Compartir plano (Web Share API con fallback a portapapeles)
+  const btnShare = document.getElementById("btn-share");
+  const btnShareMob = document.getElementById("btn-share-mob");
+  
+  if (btnShare) btnShare.addEventListener("click", sharePlan);
+  if (btnShareMob) btnShareMob.addEventListener("click", sharePlan);
 }
+
+/**
+ * --- SISTEMA NATIVO DE COMPARTIR Y NOTIFICACIÓN TOAST ---
+ * Abre el menú de compartir nativo del dispositivo (móvil) o copia el enlace (escritorio/fallback)
+ */
+let toastTimeout = null;
+
+function sharePlan() {
+  const shareData = {
+    title: 'Salón Jardín La Flor | Planificador Interactivo 2D y 3D',
+    text: '¡Mira la distribución interactiva de mesas y elementos en el Salón Jardín La Flor que acabo de planificar!',
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+    navigator.share(shareData)
+      .then(() => {
+        showToast('<i class="fa-solid fa-circle-check" style="color: #34d399;"></i> ¡Plano compartido con éxito!');
+      })
+      .catch((err) => {
+        // Si el usuario canceló de manera nativa (AbortError), no hacemos fallback
+        if (err.name !== 'AbortError') {
+          copyLinkFallback();
+        }
+      });
+  } else {
+    copyLinkFallback();
+  }
+}
+
+function copyLinkFallback() {
+  navigator.clipboard.writeText(window.location.href)
+    .then(() => {
+      showToast('<i class="fa-solid fa-copy" style="color: #60a5fa;"></i> ¡Enlace copiado al portapapeles!');
+    })
+    .catch(() => {
+      showToast('<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> No se pudo copiar el enlace.');
+    });
+}
+
+function showToast(messageHtml) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+
+  toast.innerHTML = messageHtml;
+  toast.classList.add('show');
+
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3500);
+}
+

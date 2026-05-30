@@ -177,6 +177,11 @@ function populateToolbox() {
       case "sign-out-alt": iconClass += "fa-door-closed"; break;
       case "square": iconClass += "fa-vector-square"; break;
       case "circle": iconClass += "fa-circle-dot"; break;
+      case "bell": iconClass += "fa-bell"; break;
+      case "cocktail": iconClass += "fa-martini-glass-citrus"; break;
+      case "music": iconClass += "fa-music"; break;
+      case "couch": iconClass += "fa-couch"; break;
+      case "umbrella": iconClass += "fa-umbrella-beach"; break;
       default: iconClass += "fa-shapes"; break;
     }
     

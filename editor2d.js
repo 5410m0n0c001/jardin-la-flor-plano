@@ -906,13 +906,51 @@ function renderTable(group, elem) {
   center.setAttribute("stroke-width", "1");
   group.appendChild(center);
   
-  // Detalle de flores verdes/rojas
-  const plant = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  plant.setAttribute("cx", 0);
-  plant.setAttribute("cy", 0);
-  plant.setAttribute("r", isCircle ? rPx * 0.15 : Math.min(elem.w, elem.h) * SCALE * 0.1);
-  plant.setAttribute("fill", elem.id === "table-xv" ? "#f472b6" : "#16803d"); // Flores de XV o verdes
-  group.appendChild(plant);
+  // Detalle de flores o sombrilla
+  if (elem.name.toLowerCase().includes("sombrilla")) {
+    const umbrellaGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    
+    // Lona circular de sombrilla (Azul playa)
+    const canopy = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    canopy.setAttribute("cx", 0);
+    canopy.setAttribute("cy", 0);
+    canopy.setAttribute("r", rPx * 0.95);
+    canopy.setAttribute("fill", "#0284c7");
+    canopy.setAttribute("stroke", "#ffffff");
+    canopy.setAttribute("stroke-width", "2");
+    canopy.setAttribute("opacity", "0.95");
+    umbrellaGroup.appendChild(canopy);
+    
+    // Gajos blancos decorativos
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI) / 4;
+      const radialLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      radialLine.setAttribute("x1", 0);
+      radialLine.setAttribute("y1", 0);
+      radialLine.setAttribute("x2", Math.sin(angle) * rPx * 0.95);
+      radialLine.setAttribute("y2", Math.cos(angle) * rPx * 0.95);
+      radialLine.setAttribute("stroke", "#ffffff");
+      radialLine.setAttribute("stroke-width", "1.5");
+      umbrellaGroup.appendChild(radialLine);
+    }
+    
+    // Tapón/mástil central superior
+    const cap = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    cap.setAttribute("cx", 0);
+    cap.setAttribute("cy", 0);
+    cap.setAttribute("r", 4);
+    cap.setAttribute("fill", "#ffffff");
+    umbrellaGroup.appendChild(cap);
+    
+    group.appendChild(umbrellaGroup);
+  } else {
+    const plant = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    plant.setAttribute("cx", 0);
+    plant.setAttribute("cy", 0);
+    plant.setAttribute("r", isCircle ? rPx * 0.15 : Math.min(elem.w, elem.h) * SCALE * 0.1);
+    plant.setAttribute("fill", elem.id === "table-xv" ? "#f472b6" : "#16803d");
+    group.appendChild(plant);
+  }
   
   // D) Texto Identificador
   const text = document.createElementNS("http://www.w3.org/2000/svg", "text");

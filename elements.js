@@ -189,5 +189,55 @@ export const FUTURE_ELEMENTS_TEMPLATES = [
     color: "#059669",
     chairs: 10,
     icon: "circle"
+  },
+  {
+    type: "reception",
+    name: "Recepción",
+    w: 3.0,
+    h: 1.5,
+    shape: "rectangle",
+    color: "#6366f1",
+    chairs: 0,
+    icon: "bell"
+  },
+  {
+    type: "second_bar",
+    name: "Segunda Barra",
+    w: 5.0,
+    h: 1.5,
+    shape: "rectangle",
+    color: "#7c2d12",
+    chairs: 0,
+    icon: "cocktail"
+  },
+  {
+    type: "second_dj",
+    name: "Segundo DJ / Audio",
+    w: 4.0,
+    h: 1.5,
+    shape: "rectangle",
+    color: "#312e81",
+    chairs: 0,
+    icon: "music"
+  },
+  {
+    type: "lounge",
+    name: "Sala Lounge",
+    w: 3.0,
+    h: 3.0,
+    shape: "rectangle",
+    color: "#db2777",
+    chairs: 0,
+    icon: "couch"
+  },
+  {
+    type: "table_umbrella",
+    name: "Mesa con Sombrilla",
+    w: 2.0,
+    h: 2.0,
+    shape: "circle",
+    color: "#0284c7",
+    chairs: 6,
+    icon: "umbrella"
   }
 ];

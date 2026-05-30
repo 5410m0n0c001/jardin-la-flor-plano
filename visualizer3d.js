@@ -646,6 +646,42 @@ function build3DTable(group, elem) {
   const flowers = new THREE.Mesh(floralGeom, floralMat);
   flowers.position.y = tableHeight + 0.18;
   group.add(flowers);
+
+  // D) Si es mesa con sombrilla, añadir mástil y lona de sombrilla en 3D
+  if (elem.name.toLowerCase().includes("sombrilla")) {
+    const umbrellaGroup = new THREE.Group();
+    
+    // Mástil de la sombrilla (tubo de metal blanco cromado)
+    const poleGeom = new THREE.CylinderGeometry(0.02, 0.02, 2.2, 8);
+    const poleMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.8, roughness: 0.1 });
+    const pole = new THREE.Mesh(poleGeom, poleMat);
+    pole.position.y = 1.1; // Altura del mástil de 2.2m
+    umbrellaGroup.add(pole);
+    
+    // Lona de la sombrilla (cono azul)
+    const canopyGeom = new THREE.ConeGeometry(radius * 0.95, 0.4, 16);
+    const canopyMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7, // Azul piscina/playa
+      roughness: 0.7,
+      side: THREE.DoubleSide
+    });
+    const canopy = new THREE.Mesh(canopyGeom, canopyMat);
+    canopy.position.y = 2.0; // A 2.0m de altura
+    umbrellaGroup.add(canopy);
+    
+    // Varillas / Aro de varilla blanco
+    const ringGeom = new THREE.CylinderGeometry(radius * 0.95, radius * 0.95, 0.02, 16, 1, true);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const ring = new THREE.Mesh(ringGeom, ringMat);
+    ring.position.y = 1.8;
+    umbrellaGroup.add(ring);
+    
+    group.add(umbrellaGroup);
+    
+    // Ajustar el jarrón y florero para acomodar el mástil
+    flowers.scale.set(0.6, 0.6, 0.6);
+    flowers.position.y = tableHeight + 0.12;
+  }
   
   // C) Sillas alrededor de la mesa
   const chairOffset = radius + 0.2; // Separación respecto al centro

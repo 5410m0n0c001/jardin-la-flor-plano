@@ -306,8 +306,12 @@ export function syncWithData(elementsArray) {
       scene.add(group);
       active3dElements[elem.id] = group;
     } else {
-      // Si el tipo o forma cambió, reconstruir la geometría
-      if (group.userData.shape !== elem.shape || group.userData.chairs !== elem.chairs || group.userData.color !== elem.color) {
+      // Si el tipo, forma o tamaño cambió, reconstruir la geometría
+      if (group.userData.shape !== elem.shape || 
+          group.userData.chairs !== elem.chairs || 
+          group.userData.color !== elem.color ||
+          group.userData.w !== elem.w ||
+          group.userData.h !== elem.h) {
         // Limpiar mallas antiguas
         while(group.children.length > 0){
           group.remove(group.children[0]);
@@ -387,6 +391,8 @@ function build3DElement(group, elem) {
   group.userData.shape = elem.shape;
   group.userData.chairs = elem.chairs;
   group.userData.color = elem.color;
+  group.userData.w = elem.w;
+  group.userData.h = elem.h;
   
   switch (elem.type) {
     case "garden":

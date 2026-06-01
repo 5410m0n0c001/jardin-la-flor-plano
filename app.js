@@ -17,8 +17,18 @@ const state = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Cargar datos iniciales
-  state.elements = JSON.parse(JSON.stringify(INITIAL_ELEMENTS)); // Clona profunda de base
+  // 1. Cargar datos iniciales (desde LocalStorage si existen, o original de elements.js)
+  const saved = localStorage.getItem("jardin_la_flor_saved_layout");
+  if (saved) {
+    try {
+      state.elements = JSON.parse(saved);
+    } catch (e) {
+      console.error("Error al cargar distribución guardada, usando predeterminada.", e);
+      state.elements = JSON.parse(JSON.stringify(INITIAL_ELEMENTS));
+    }
+  } else {
+    state.elements = JSON.parse(JSON.stringify(INITIAL_ELEMENTS));
+  }
   
   // 2. Inicializar interfaces y HUD
   setupUI();
@@ -238,6 +248,9 @@ function addNewElement(template) {
   // Actualizar vistas
   syncAllViews();
   
+  // Auto-guardar en LocalStorage silenciosamente
+  saveLayoutToLocalStorage(true);
+  
   // Autoseleccionar el nuevo elemento
   handleElementSelected(newElement);
   if (state.activeView === "2d") {
@@ -383,6 +396,9 @@ function handleElementMoved(element) {
   if (state.activeView === "3d") {
     syncWithData(state.elements);
   }
+  
+  // Auto-guardar silencioso de la posición tras el arrastre
+  saveLayoutToLocalStorage(true);
 }
 
 /**
@@ -393,6 +409,7 @@ function setupInspectorListeners() {
     if (!state.selectedElement) return;
     state.selectedElement[key] = val;
     syncAllViews();
+    saveLayoutToLocalStorage(true); // Auto-guardar al cambiar valores en inspector
   };
   
   // 1. Nombre
@@ -468,6 +485,7 @@ function setupInspectorListeners() {
       document.getElementById("elem-h").value = state.selectedElement.w;
       
       syncAllViews();
+      saveLayoutToLocalStorage(true); // Auto-guardar forma
     }
   });
   
@@ -481,6 +499,7 @@ function setupInspectorListeners() {
       state.selectedElement.h = state.selectedElement.w; // En circulo h = w (diámetro)
       
       syncAllViews();
+      saveLayoutToLocalStorage(true); // Auto-guardar forma
     }
   });
   
@@ -515,6 +534,7 @@ function setupInspectorListeners() {
     
     state.elements.push(clone);
     syncAllViews();
+    saveLayoutToLocalStorage(true); // Auto-guardar duplicación
     
     // Seleccionar la copia
     handleElementSelected(clone);
@@ -535,6 +555,7 @@ function setupInspectorListeners() {
       state.selectedElement = null;
       handleElementSelected(null);
       syncAllViews();
+      saveLayoutToLocalStorage(true); // Auto-guardar eliminación
     }
   });
 }
@@ -563,6 +584,26 @@ function setupControlListeners() {
   if (btnGridMob) btnGridMob.addEventListener("click", toggleGrid);
   
   // Exportar distribución (JSON)
+  // Guardar diseño localmente (LocalStorage)
+  const saveLocal = () => {
+    saveLayoutToLocalStorage(false);
+  };
+  
+  const btnSaveLocal = document.getElementById("btn-save-local");
+  if (btnSaveLocal) btnSaveLocal.addEventListener("click", saveLocal);
+  const btnSaveLocalMob = document.getElementById("btn-save-local-mob");
+  if (btnSaveLocalMob) btnSaveLocalMob.addEventListener("click", saveLocal);
+
+  // Alinear elementos automáticamente
+  const alignAll = () => {
+    alignElements();
+  };
+
+  const btnAlign = document.getElementById("btn-align");
+  if (btnAlign) btnAlign.addEventListener("click", alignAll);
+  const btnAlignMob = document.getElementById("btn-align-mob");
+  if (btnAlignMob) btnAlignMob.addEventListener("click", alignAll);
+
   const exportDesign = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.elements, null, 2));
     const dlAnchorElem = document.createElement('a');
@@ -610,6 +651,9 @@ function setupControlListeners() {
           }
           updateBadgeCounters();
           
+          // Guardar diseño importado localmente
+          saveLayoutToLocalStorage(true);
+          
           alert("¡Diseño del plano cargado con éxito!");
         } else {
           alert("Error: El archivo JSON cargado no tiene un formato válido para el plano.");
@@ -627,10 +671,12 @@ function setupControlListeners() {
   const resetLayout = () => {
     const confirmReset = confirm("¿Está seguro de que desea restablecer el diseño? Se borrarán todos los cambios y elementos adicionales creados.");
     if (confirmReset) {
+      localStorage.removeItem("jardin_la_flor_saved_layout");
       state.elements = JSON.parse(JSON.stringify(INITIAL_ELEMENTS));
       state.selectedElement = null;
       handleElementSelected(null);
       syncAllViews();
+      showToast('<i class="fa-solid fa-rotate-left" style="color: #f87171;"></i> Plano restablecido a la distribución original.');
     }
   };
   
@@ -724,5 +770,117 @@ function showToast(messageHtml) {
   toastTimeout = setTimeout(() => {
     toast.classList.remove('show');
   }, 3500);
+}
+
+/**
+ * --- FUNCIONES DE ALINEACIÓN Y PERSISTENCIA (LOCALSTORAGE) ---
+ */
+
+function saveLayoutToLocalStorage(silent = false) {
+  try {
+    localStorage.setItem("jardin_la_flor_saved_layout", JSON.stringify(state.elements));
+    if (!silent) {
+      showToast('<i class="fa-solid fa-circle-check" style="color: #34d399;"></i> ¡Distribución guardada en el navegador!');
+    }
+  } catch (e) {
+    console.error("Error al guardar en LocalStorage:", e);
+    if (!silent) {
+      showToast('<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Error al guardar la distribución.');
+    }
+  }
+}
+
+function alignElements() {
+  const threshold = 0.5; // Umbral de proximidad en metros (50cm)
+  
+  // Elementos móviles o mesas que el usuario puede desplazar/eliminar (evitando base inamovibles)
+  const alignableTypes = [
+    "table", "table_square", "table_round", "table_umbrella",
+    "lounge", "second_bar", "second_dj", "reception",
+    "bathrooms", "chapel", "parking"
+  ];
+  
+  const items = state.elements.filter(e => alignableTypes.includes(e.type) && e.removable !== false);
+  
+  if (items.length <= 1) {
+    showToast('<i class="fa-solid fa-circle-info" style="color: #60a5fa;"></i> Se necesitan al menos 2 elementos móviles para alinear.');
+    return;
+  }
+  
+  let modified = false;
+
+  // 1. Alineación Horizontal (Y): Agrupamiento por cercanía
+  let yGroups = [];
+  items.forEach(item => {
+    let groupFound = false;
+    for (let group of yGroups) {
+      if (group.some(member => Math.abs(member.y - item.y) <= threshold)) {
+        group.push(item);
+        groupFound = true;
+        break;
+      }
+    }
+    if (!groupFound) {
+      yGroups.push([item]);
+    }
+  });
+
+  yGroups.forEach(group => {
+    if (group.length > 1) {
+      let avgY = group.reduce((sum, item) => sum + item.y, 0) / group.length;
+      if (state.useGrid) {
+        avgY = Math.round(avgY / 0.1) * 0.1; // Snapping a rejilla
+      }
+      avgY = parseFloat(avgY.toFixed(2));
+      
+      group.forEach(item => {
+        if (item.y !== avgY) {
+          item.y = avgY;
+          modified = true;
+        }
+      });
+    }
+  });
+
+  // 2. Alineación Vertical (X): Agrupamiento por cercanía
+  let xGroups = [];
+  items.forEach(item => {
+    let groupFound = false;
+    for (let group of xGroups) {
+      if (group.some(member => Math.abs(member.x - item.x) <= threshold)) {
+        group.push(item);
+        groupFound = true;
+        break;
+      }
+    }
+    if (!groupFound) {
+      xGroups.push([item]);
+    }
+  });
+
+  xGroups.forEach(group => {
+    if (group.length > 1) {
+      let avgX = group.reduce((sum, item) => sum + item.x, 0) / group.length;
+      if (state.useGrid) {
+        avgX = Math.round(avgX / 0.1) * 0.1; // Snapping a rejilla
+      }
+      avgX = parseFloat(avgX.toFixed(2));
+      
+      group.forEach(item => {
+        if (item.x !== avgX) {
+          item.x = avgX;
+          modified = true;
+        }
+      });
+    }
+  });
+
+  if (modified) {
+    syncAllViews();
+    saveLayoutToLocalStorage(true);
+    showToast('<i class="fa-solid fa-align-center" style="color: #fbbf24;"></i> ¡Distribución alineada automáticamente!');
+  } else {
+    showToast('<i class="fa-solid fa-circle-info" style="color: #60a5fa;"></i> Los elementos ya están perfectamente alineados.');
+  }
 }
 

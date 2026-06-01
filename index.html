@@ -75,11 +75,17 @@
           <button id="btn-grid" class="btn-action active" title="Mostrar/Ocultar Rejilla Magnética">
             <i class="fa-solid fa-border-all"></i> <span class="hide-mobile">Rejilla</span>
           </button>
-          <button id="btn-export" class="btn-action btn-success" title="Exportar Distribución (JSON)">
-            <i class="fa-solid fa-download"></i> <span>Guardar</span>
+          <button id="btn-save-local" class="btn-action btn-success" title="Guardar Distribución Actual en el Navegador">
+            <i class="fa-solid fa-floppy-disk"></i> <span>Guardar Distribución</span>
           </button>
-          <button id="btn-import-trigger" class="btn-action" title="Cargar Distribución (JSON)">
-            <i class="fa-solid fa-upload"></i> <span>Cargar</span>
+          <button id="btn-align" class="btn-action btn-warning" title="Alinear Elementos Automáticamente">
+            <i class="fa-solid fa-align-center"></i> <span>Alinear</span>
+          </button>
+          <button id="btn-export" class="btn-action" title="Exportar Distribución en archivo JSON">
+            <i class="fa-solid fa-download"></i> <span class="hide-mobile">Exportar JSON</span>
+          </button>
+          <button id="btn-import-trigger" class="btn-action" title="Cargar Distribución desde archivo JSON">
+            <i class="fa-solid fa-upload"></i> <span class="hide-mobile">Cargar JSON</span>
           </button>
           <input type="file" id="file-import" accept=".json" style="display: none;">
           
@@ -117,11 +123,17 @@
               <button id="btn-grid-mob" class="btn-action-mobile active" title="Rejilla">
                 <i class="fa-solid fa-border-all"></i> Rejilla
               </button>
-              <button id="btn-export-mob" class="btn-action-mobile btn-success-mobile" title="Guardar">
-                <i class="fa-solid fa-download"></i> Guardar
+              <button id="btn-save-local-mob" class="btn-action-mobile btn-success-mobile" title="Guardar Distribución en Navegador">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar Dist.
               </button>
-              <button id="btn-import-trigger-mob" class="btn-action-mobile" title="Cargar">
-                <i class="fa-solid fa-upload"></i> Cargar
+              <button id="btn-align-mob" class="btn-action-mobile btn-warning-mobile" title="Alinear Elementos">
+                <i class="fa-solid fa-align-center"></i> Alinear
+              </button>
+              <button id="btn-export-mob" class="btn-action-mobile" title="Exportar JSON">
+                <i class="fa-solid fa-download"></i> Exportar JSON
+              </button>
+              <button id="btn-import-trigger-mob" class="btn-action-mobile" title="Cargar JSON">
+                <i class="fa-solid fa-upload"></i> Cargar JSON
               </button>
               <button id="btn-reset-mob" class="btn-action-mobile btn-danger-mobile" title="Reiniciar">
                 <i class="fa-solid fa-rotate-left"></i> Reiniciar

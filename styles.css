@@ -231,6 +231,18 @@ body {
   border-color: var(--color-danger);
 }
 
+.btn-warning {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.btn-warning:hover {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: #f59e0b;
+}
+
+
 /* ==========================================
    4. CUERPO Y COMPONENTES PRINCIPALES
    ========================================== */
@@ -951,6 +963,16 @@ input[type="text"]:focus, input[type="number"]:focus {
   background: rgba(6, 182, 212, 0.25);
 }
 
+.btn-warning-mobile {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+.btn-warning-mobile:hover {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+
 .divider-horizontal {
   height: 1px;
   background: var(--border-color);
@@ -1017,9 +1039,50 @@ input[type="text"]:focus, input[type="number"]:focus {
   }
 }
 
+/* ==========================================
+   13. RESPONSIVE DESIGN (MEDIA QUERIES)
+   ========================================== */
+
+/* Optimizaciones para pantallas de escritorio medianas/pequeñas (1200px a 1420px) */
+@media (max-width: 1420px) {
+  #btn-grid span,
+  #btn-export span,
+  #btn-import-trigger span,
+  #btn-share span,
+  #btn-print span,
+  #btn-reset span {
+    display: none !important;
+  }
+  .header-controls {
+    gap: 12px;
+  }
+  .action-buttons {
+    gap: 6px;
+  }
+}
+
+/* Ocultar todos los textos de acciones en el header para pantallas estrechas (950px a 1200px) */
+@media (max-width: 1200px) {
+  .action-buttons .btn-action span {
+    display: none !important;
+  }
+  .header-controls {
+    gap: 8px;
+  }
+  .action-buttons {
+    gap: 4px;
+  }
+}
+
 @media (max-width: 950px) {
   .app-header {
     padding: 0 12px;
+  }
+  
+  /* Ocultar barra redundante y divisor en móvil (se accede desde el menú lateral drawer) */
+  .header-controls .action-buttons,
+  .header-controls .divider {
+    display: none !important;
   }
   
   .hide-desktop {

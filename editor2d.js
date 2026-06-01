@@ -262,7 +262,8 @@ function render() {
   
   currentElements.forEach(elem => {
     const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    group.setAttribute("class", `draggable ${elem.type}`);
+    const typeClass = elem.type === "bar" ? "kitchen-bar" : elem.type;
+    group.setAttribute("class", `draggable ${typeClass}`);
     group.setAttribute("data-id", elem.id);
     group.setAttribute("transform", `translate(${elem.x * SCALE}, ${elem.y * SCALE}) rotate(${elem.rotation || 0})`);
     

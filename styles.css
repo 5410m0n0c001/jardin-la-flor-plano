@@ -1388,16 +1388,21 @@ input[type="text"]:focus, input[type="number"]:focus {
   }
 
   /* 2. Barra / Cocina */
-  .bar rect {
-    fill: #fafaf9 !important; /* beige muy suave */
+  .kitchen-bar rect {
+    fill: #efebe9 !important; /* Madera clara (contraste para impresión) */
     stroke: #78350f !important;
     stroke-width: 2px !important;
   }
-  .bar text {
+  .kitchen-bar text {
     fill: #78350f !important;
   }
-  .bar rect + rect {
-    fill: #f5f5f4 !important;
+  .kitchen-bar rect + rect {
+    fill: #ffffff !important; /* Encimera blanca contrastante */
+  }
+  .kitchen-bar g rect {
+    fill: #cfd8dc !important; /* Fregadero plateado */
+    stroke: #78909c !important;
+    stroke-width: 1.5px !important;
   }
 
   /* 3. Pista de baile */
